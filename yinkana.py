@@ -3,6 +3,7 @@
 from socket import *
 import re
 import hashlib
+from base64 import b64encode
 
 
 class yinkana():
@@ -166,8 +167,23 @@ class yinkana():
 
         msg=sock.recv(1024)
         print(msg.decode())
-                    
+
+        return msg.decode().split(":")[1]
+
+    #YAP               
+    def reto5(self,key):
+        sock=socket(AF_INET,SOCK_DGRAM)
+        server=('node1',7000)
+        final_key=key.split('\n')[0]
         
+        final_key=b64encode(final_key.encode())
+        checksum= b'\xbd'
+        header=b'YAP'+b'\x00\x00'+b'\x00'+checksum
+        
+        msg=header+final_key
+        sock.sendto(msg,server)
+        msg,server=sock.recvfrom(1024)
+        print(msg)
 
 def main():
     y=yinkana()
@@ -177,6 +193,7 @@ def main():
     key=y.reto1(key)
     key=y.reto2(key)
     key=y.reto3(key)
-    y.reto4(key)
+    key=y.reto4(key)
+    y.reto5(key)
 
 main()
