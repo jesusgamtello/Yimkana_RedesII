@@ -4,6 +4,8 @@ from socket import *
 import re
 import hashlib
 from base64 import b64encode
+import struct
+import array
 
 
 class yinkana():
@@ -177,13 +179,66 @@ class yinkana():
         final_key=key.split('\n')[0]
         
         final_key=b64encode(final_key.encode())
-        checksum= b'\xbd'
-        header=b'YAP'+b'\x00\x00'+b'\x00'+checksum
-        
+        checksum= '0'
+        header=b'YAP'+b'\x00\x00'+b'\x00'+checksum.encode()
         msg=header+final_key
+        checksum=str(self.checksum(str(msg)))
+        print("ultimo metodo\n",checksum)
+
+        checksum1=str(self.checksum1(str(msg)))
+        print("primer metodo\n",checksum1)
+
+        header=b'YAP'+b'\x00\x00'+b'\x00'+checksum.encode()
+        msg=header+final_key
+        print(msg)
         sock.sendto(msg,server)
         msg,server=sock.recvfrom(1024)
         print(msg)
+
+    def checksum1(self,msg):
+        s = 0
+        # loop taking 2 characters at a time
+        for i in range(0, len(msg), 2):
+            w = ord(msg[i]) + (ord(msg[i+1]) << 8 )
+            s = s + w
+
+            s = (s>>16) + (s & 0xffff)
+            s = s + (s >> 16)
+
+            #complement and mask to 4 byte short
+            s = ~s & 0xffff
+
+            return s
+
+
+    '''def checksum(self,data, sum=0):
+        # make 16 bit words out of every two adjacent 8 bit words in the packet
+        # and add them up
+        for i in range(0,len(data),2):
+            if i + 1 >= len(data):
+                sum += ord(data[i]) & 0xFF
+            else:
+                w = ((ord(data[i]) << 8) & 0xFF00) + (ord(data[i+1]) & 0xFF)
+                sum += w
+
+        # take only 16 bits out of the 32 bit sum and add up the carries
+        while (sum >> 16) > 0:
+            sum = (sum & 0xffff) + (sum >> 16)
+
+        # one's complement the result
+        sum = ~sum
+
+        return sum & 0xffff'''
+
+    def checksum(self,pkt):
+        if len(pkt) % 2 == 1:
+                pkt += "\0"
+        s = sum(array.array("H", pkt))
+        s = (s >> 16) + (s & 0xffff)
+        s += s >> 16
+        s = ~s
+        
+        return s & 0xffff or 0xffff
 
 def main():
     y=yinkana()
