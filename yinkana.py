@@ -193,10 +193,6 @@ class yinkana():
         print(msg.decode())
        
        
-
-        
-
-
     #codigo sacado de https://bitbucket.org/DavidVilla/inet-checksum/src/master/inet_checksum.py
     def sum16(self,data):
         if len(data) % 2:
