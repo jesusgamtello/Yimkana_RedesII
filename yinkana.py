@@ -6,8 +6,11 @@ import hashlib
 from base64 import b64encode
 from base64 import b64decode
 import struct
-import array
-
+import json
+import urllib.request
+import urllib.response
+import datetime 
+import locale
 
 class yinkana():
    
@@ -187,11 +190,12 @@ class yinkana():
         header=struct.pack('!3sBHH',b'YAP',0,0,checksum)
         msg=header+final_key
         sock.sendto(msg,server)
-        msg,server=sock.recvfrom(1024)
+        msg,server=sock.recvfrom(2048)
         msg=msg[8:]
         msg=b64decode(msg)
         print(msg.decode())
-       
+
+        return msg.decode().split(":")[1]
        
     #codigo sacado de https://bitbucket.org/DavidVilla/inet-checksum/src/master/inet_checksum.py
     def sum16(self,data):
@@ -208,6 +212,82 @@ class yinkana():
         return _1s_complement
 
 
+    def reto6(self,key):
+        
+        final_key=key.split('\n')[0]
+        sock = socket(AF_INET,SOCK_STREAM)
+        server = ('node1', 8003)
+        sock.connect(server)
+        msg=(final_key+' '+'1515').encode()
+        sock.send(msg)
+       
+
+
+        sock_serverhttp=socket(AF_INET,SOCK_STREAM)
+        sock_serverhttp.bind(('0.0.0.0',1515))
+        sock_serverhttp.listen(100)
+        while True:
+            sck,server=sock_serverhttp.accept()
+            msg=sck.recv(1024)
+            print(msg.decode())
+
+            rfc=msg.decode()
+            peticion=rfc.split('\n')[0]
+            getorpost=peticion.split()[0]
+            print(getorpost)
+           
+            rfc=rfc[rfc.find('rfc'):rfc.find('HTTP')-1]
+            #print(rfc)
+            
+            req= urllib.request.Request(url='http://www.ietf.org/rfc/'+rfc)
+        
+            with urllib.request.urlopen(req) as url:
+                texto=url.read().decode("utf-8")
+
+            date = datetime.datetime.utcnow().strftime('%a, %d %b %Y %H:%M:%S GMT') 
+            sck.send('HTTP/1.1 200 OK\n'.encode("utf-8"))
+            sck.send(('Date: '+date+'\n').encode("utf-8"))
+            sck.send('Content-Type: text/plain\n'.encode("utf-8"))
+            sck.send(('Content-Length: '+str(len(texto))+'\n').encode("utf-8"))
+            sck.send('\n'.encode("utf-8"))
+
+            
+            sck.send(texto.encode())
+            print('envio')
+            if getorpost=='POST':
+                print('la cabecera es ',getorpost)
+                break
+           
+        
+            
+       
+        '''
+        req.add_header("Date",str(date))
+        req.add_header('Content-Type', 'text/plain')
+        req.add_header('Content-Length',str(len(texto)))
+        req.add_header('User-Agent','Yinkana/2020 web client')
+        data = {
+            "Response": 200,
+            "Date": date,
+            "Content-Type": texto,
+            "Content-Length": len(texto) 
+        }
+
+        
+        data = json.dumps(data)
+        req = urllib.request.Request(url = ' http://192.168.0.11:1515/', data = bytes(data.encode("utf-8")), method = "POST")
+
+       # Add the appropriate header.
+        
+
+        with urllib.request.urlopen(req) as resp:
+            response_data = json.loads(resp.read().decode("utf-8"))
+            print(response_data)'''
+        sock_serverhttp.close()
+        sock.close()
+        
+        
+
 def main():
     y=yinkana()
 
@@ -217,6 +297,7 @@ def main():
     key=y.reto2(key)
     key=y.reto3(key)
     key=y.reto4(key)
-    y.reto5(key)
+    key=y.reto5(key)
+    y.reto6(key)
 
 main()
