@@ -235,11 +235,13 @@ class yinkana():
             peticion=rfc.split('\n')[0]
             getorpost=peticion.split()[0]
             print(getorpost)
-           
+            if getorpost=='POST':
+                print('la cabecera es ',getorpost)
+                break
             rfc=rfc[rfc.find('rfc'):rfc.find('HTTP')-1]
             #print(rfc)
             
-            req= urllib.request.Request(url='http://www.ietf.org/rfc/'+rfc)
+            req= urllib.request.Request(url='https://uclm-arco.github.io/ietf-clone/rfc/'+rfc)
         
             with urllib.request.urlopen(req) as url:
                 texto=url.read().decode("utf-8")
@@ -254,9 +256,7 @@ class yinkana():
             
             sck.send(texto.encode())
             print('envio')
-            if getorpost=='POST':
-                print('la cabecera es ',getorpost)
-                break
+            
            
         
             
