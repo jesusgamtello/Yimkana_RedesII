@@ -237,7 +237,11 @@ class yinkana():
             print(getorpost)
             if getorpost=='POST':
                 print('la cabecera es ',getorpost)
-                break
+                nuevo_reto=rfc.split("code:")[1]
+                print(nuevo_reto.split()[0])
+                return nuevo_reto.split()[0]
+        
+
             rfc=rfc[rfc.find('rfc'):rfc.find('HTTP')-1]
             #print(rfc)
             
@@ -247,45 +251,30 @@ class yinkana():
                 texto=url.read().decode("utf-8")
 
             date = datetime.datetime.utcnow().strftime('%a, %d %b %Y %H:%M:%S GMT') 
-            sck.send('HTTP/1.1 200 OK\n'.encode("utf-8"))
-            sck.send(('Date: '+date+'\n').encode("utf-8"))
-            sck.send('Content-Type: text/plain\n'.encode("utf-8"))
-            sck.send(('Content-Length: '+str(len(texto))+'\n').encode("utf-8"))
-            sck.send('\n'.encode("utf-8"))
+            '''sck.send('HTTP/1.1 200 OK\r\n'.encode("utf-8"))
+            sck.send(('Date: '+date+'\r\n').encode("utf-8"))
+            sck.send('Content-Type: text/plain\r\n'.encode("utf-8"))
+            sck.send(('Content-Length: '+str(len(texto))+'\r\n').encode("utf-8"))
+            sck.send('\n'.encode("utf-8"))'''
 
+            cabecera='HTTP/1.1 200 OK\r\n'+'Date: '+date+'\r\n'+'Content-Type: text/plain\r\n'+'Content-Length: '+str(len(texto))+'\r\n'
+            paquete=cabecera+texto+'\r\n'
             
-            sck.send(texto.encode())
+            sck.send(paquete.encode())
+            #sck.send('\r\n'.encode("utf-8"))
             print('envio')
-            
-           
-        
-            
        
-        '''
-        req.add_header("Date",str(date))
-        req.add_header('Content-Type', 'text/plain')
-        req.add_header('Content-Length',str(len(texto)))
-        req.add_header('User-Agent','Yinkana/2020 web client')
-        data = {
-            "Response": 200,
-            "Date": date,
-            "Content-Type": texto,
-            "Content-Length": len(texto) 
-        }
-
-        
-        data = json.dumps(data)
-        req = urllib.request.Request(url = ' http://192.168.0.11:1515/', data = bytes(data.encode("utf-8")), method = "POST")
-
-       # Add the appropriate header.
-        
-
-        with urllib.request.urlopen(req) as resp:
-            response_data = json.loads(resp.read().decode("utf-8"))
-            print(response_data)'''
         sock_serverhttp.close()
         sock.close()
-        
+    
+    def reto7(self,key):
+        sock = socket(AF_INET,SOCK_STREAM)
+        server = ('node1', 33333)
+        sock.connect(server)
+        msg=(key).encode()
+        sock.send(msg)
+        msg=sock.recv(1024)
+        print(msg.decode())
         
 
 def main():
@@ -298,6 +287,7 @@ def main():
     key=y.reto3(key)
     key=y.reto4(key)
     key=y.reto5(key)
-    y.reto6(key)
+    key=y.reto6(key)
+    y.reto7(key)
 
 main()
