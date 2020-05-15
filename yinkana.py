@@ -229,16 +229,14 @@ class yinkana():
         while True:
             sck,server=sock_serverhttp.accept()
             msg=sck.recv(1024)
-            print(msg.decode())
+           
 
             rfc=msg.decode()
             peticion=rfc.split('\n')[0]
             getorpost=peticion.split()[0]
-            print(getorpost)
+        
             if getorpost=='POST':
-                print('la cabecera es ',getorpost)
                 nuevo_reto=rfc.split("code:")[1]
-                print(nuevo_reto.split()[0])
                 return nuevo_reto.split()[0]
         
 
@@ -251,18 +249,11 @@ class yinkana():
                 texto=url.read().decode("utf-8")
 
             date = datetime.datetime.utcnow().strftime('%a, %d %b %Y %H:%M:%S GMT') 
-            '''sck.send('HTTP/1.1 200 OK\r\n'.encode("utf-8"))
-            sck.send(('Date: '+date+'\r\n').encode("utf-8"))
-            sck.send('Content-Type: text/plain\r\n'.encode("utf-8"))
-            sck.send(('Content-Length: '+str(len(texto))+'\r\n').encode("utf-8"))
-            sck.send('\n'.encode("utf-8"))'''
-
+            
             cabecera='HTTP/1.1 200 OK\r\n'+'Date: '+date+'\r\n'+'Content-Type: text/plain\r\n'+'Content-Length: '+str(len(texto))+'\r\n'
             paquete=cabecera+texto+'\r\n'
-            
             sck.send(paquete.encode())
-            #sck.send('\r\n'.encode("utf-8"))
-            print('envio')
+            
        
         sock_serverhttp.close()
         sock.close()
