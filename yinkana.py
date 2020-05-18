@@ -22,7 +22,6 @@ class yinkana():
 
 
         msg=sock.recv(1024)
-        #print(msg.decode())
 
         sock.send("jesus.gamero".encode())
         msg=sock.recv(1024)
@@ -171,7 +170,6 @@ class yinkana():
         sock.send(md5)
 
         msg=sock.recv(2048)
-        print(msg.decode())
 
         return msg.decode().split(":")[1]
 
@@ -193,7 +191,6 @@ class yinkana():
         msg,server=sock.recvfrom(2048)
         msg=msg[8:]
         msg=b64decode(msg)
-        print(msg.decode())
 
         return msg.decode().split(":")[1]
        
@@ -237,11 +234,11 @@ class yinkana():
         
             if getorpost=='POST':
                 nuevo_reto=rfc.split("code:")[1]
+                print(nuevo_reto)
                 return nuevo_reto.split()[0]
         
 
             rfc=rfc[rfc.find('rfc'):rfc.find('HTTP')-1]
-            #print(rfc)
             
             req= urllib.request.Request(url='https://uclm-arco.github.io/ietf-clone/rfc/'+rfc)
         
